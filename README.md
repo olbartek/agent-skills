@@ -14,20 +14,20 @@ In Claude Code:
 
 ```
 /plugin marketplace add olbartek/agent-skills
-/plugin install agent-skills@agent-skills
+/plugin install agent-skills@olbartek
 ```
 
 ## Update
 
 ```
-/plugin update agent-skills@agent-skills
+/plugin update agent-skills@olbartek
 ```
 
 Or to refresh the marketplace catalog first (e.g. after adding a new skill):
 
 ```
 /plugin marketplace update agent-skills
-/plugin update agent-skills@agent-skills
+/plugin update agent-skills@olbartek
 ```
 
 ## Adding a new skill
