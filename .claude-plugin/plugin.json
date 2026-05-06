@@ -1,0 +1,9 @@
+{
+  "name": "agent-skills",
+  "version": "0.1.0",
+  "description": "Personal collection of Claude Code skills: cloc, agent-setup, codebase-analysis.",
+  "author": {
+    "name": "Bartosz Olszanowski",
+    "email": "bartosz.olszanowski@gmail.com"
+  }
+}

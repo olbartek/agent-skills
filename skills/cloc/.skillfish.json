@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "cloc",
+  "owner": "asynkron",
+  "repo": "asynkron-skills",
+  "path": "skills/cloc",
+  "branch": "main",
+  "sha": "1f4b1cd5ddd200a6dee1a1443ca5618fded6e1ac",
+  "source": "manual"
+}

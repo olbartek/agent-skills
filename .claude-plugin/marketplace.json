@@ -1,0 +1,14 @@
+{
+  "name": "agent-skills",
+  "owner": {
+    "name": "Bartosz Olszanowski",
+    "email": "bartosz.olszanowski@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "source": ".",
+      "description": "Personal collection of Claude Code skills: cloc, agent-setup, codebase-analysis."
+    }
+  ]
+}
