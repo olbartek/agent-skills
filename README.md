@@ -1,4 +1,4 @@
-# agent-skills
+# olbartek-skills
 
 Personal collection of Claude Code skills, packaged as a plugin so they can be installed and updated from any machine.
 
@@ -14,20 +14,20 @@ In Claude Code:
 
 ```
 /plugin marketplace add olbartek/agent-skills
-/plugin install agent-skills@olbartek
+/plugin install olbartek-skills@olbartek
 ```
 
 ## Update
 
 ```
-/plugin update agent-skills@olbartek
+/plugin update olbartek-skills@olbartek
 ```
 
 Or to refresh the marketplace catalog first (e.g. after adding a new skill):
 
 ```
-/plugin marketplace update agent-skills
-/plugin update agent-skills@olbartek
+/plugin marketplace update olbartek
+/plugin update olbartek-skills@olbartek
 ```
 
 ## Adding a new skill

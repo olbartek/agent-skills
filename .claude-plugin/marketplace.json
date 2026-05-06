@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "agent-skills",
+      "name": "olbartek-skills",
       "source": {
         "source": "github",
         "repo": "olbartek/agent-skills"
