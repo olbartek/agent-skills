@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Dry-run: verify FTPS credentials + list remote paths, without uploading.
+set -euo pipefail
+
+ENV_FILE="$(dirname "$0")/../.env.deploy"
+if [ ! -f "$ENV_FILE" ]; then
+  echo "Missing .env.deploy. Copy .env.deploy.example and fill credentials." >&2
+  exit 1
+fi
+# shellcheck disable=SC1090
+set -a; source "$ENV_FILE"; set +a
+
+: "${FTP_HOST:?FTP_HOST is required}"
+: "${FTP_USER:?FTP_USER is required}"
+: "${FTP_PASS:?FTP_PASS is required}"
+
+if ! command -v lftp >/dev/null 2>&1; then
+  echo "lftp not installed. Install with: brew install lftp" >&2
+  exit 1
+fi
+
+THEME_PATH="${FTP_REMOTE_THEME_PATH:-wp-content/themes/{{THEME_SLUG}}}"
+
+echo "▸ Connecting to $FTP_HOST:${FTP_PORT:-21} as $FTP_USER (FTPS, explicit TLS)"
+lftp -c "
+  set ftp:ssl-allow yes
+  set ftp:ssl-force true
+  set ftp:ssl-protect-data true
+  set ssl:verify-certificate no
+  set net:timeout 15
+  open -u \"$FTP_USER\",\"$FTP_PASS\" -p \"${FTP_PORT:-21}\" \"ftp://$FTP_HOST\"
+  echo ''
+  echo '── contents of FTP landing directory:'
+  cls -la
+  echo ''
+  echo \"── checking target theme path: $THEME_PATH\"
+  cls -la \"$THEME_PATH\" 2>/dev/null || echo '  (path does not exist yet — deploy will create it)'
+  bye
+"
+
+echo "✓ Connection OK."

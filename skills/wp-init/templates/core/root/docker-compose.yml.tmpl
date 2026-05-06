@@ -1,0 +1,61 @@
+services:
+  wordpress:
+    image: wordpress:6-php8.3-apache
+    container_name: ${COMPOSE_PROJECT_NAME}-wordpress
+    depends_on:
+      - database
+    restart: unless-stopped
+    ports:
+      - "${WP_PORT:-{{WP_PORT}}}:80"
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        // Derive WP_HOME from actual request host so localhost:{{WP_PORT}} AND
+        // {{HOSTNAME}}:{{WP_PORT}} both work. CLI calls without --url fall back
+        // to the env-configured default. $$ escapes from Compose interpolation.
+        $${{PREFIX}}_host = isset($$_SERVER['HTTP_HOST']) && $$_SERVER['HTTP_HOST']
+          ? $$_SERVER['HTTP_HOST']
+          : parse_url('${WORDPRESS_SITE_URL}', PHP_URL_HOST) . ':' . (parse_url('${WORDPRESS_SITE_URL}', PHP_URL_PORT) ?: 80);
+        if (!defined('WP_HOME'))           define('WP_HOME',    'http://' . $${{PREFIX}}_host);
+        if (!defined('WP_SITEURL'))        define('WP_SITEURL', 'http://' . $${{PREFIX}}_host);
+        if (!defined('WP_DEBUG'))          define('WP_DEBUG', true);
+        if (!defined('WP_DEBUG_LOG'))      define('WP_DEBUG_LOG', true);
+        if (!defined('WP_DEBUG_DISPLAY'))  define('WP_DEBUG_DISPLAY', false);
+    volumes:
+      - wp_core:/var/www/html
+      - ./wp-content/themes/{{THEME_SLUG}}:/var/www/html/wp-content/themes/{{THEME_SLUG}}{{#if CUSTOM_PLUGIN}}
+      - ./wp-content/plugins/{{PLUGIN_SLUG}}:/var/www/html/wp-content/plugins/{{PLUGIN_SLUG}}{{/if}}
+
+  database:
+    image: mariadb:10.11
+    container_name: ${COMPOSE_PROJECT_NAME}-database
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-{{DB_PORT}}}:3306"
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - wp_db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ${COMPOSE_PROJECT_NAME}-phpmyadmin
+    depends_on:
+      - database
+    restart: unless-stopped
+    ports:
+      - "${PHPMYADMIN_PORT:-{{PHPMYADMIN_PORT}}}:80"
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 256M
+
+volumes:
+  wp_core:
+  wp_db_data:

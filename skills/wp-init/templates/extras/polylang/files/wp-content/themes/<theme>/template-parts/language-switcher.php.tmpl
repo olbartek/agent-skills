@@ -1,0 +1,12 @@
+<?php
+if (!defined('ABSPATH')) { exit; }
+if (!function_exists('pll_the_languages')) { return; }
+?>
+<ul class="lang-switcher">
+  <?php pll_the_languages([
+      'show_flags' => 0,
+      'show_names' => 1,
+      'hide_if_empty' => 0,
+      'display_names_as' => 'slug',
+  ]); ?>
+</ul>

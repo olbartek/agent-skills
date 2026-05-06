@@ -1,0 +1,49 @@
+# Plugins
+
+Plugins are installed and activated via `scripts/seed-db.sh`. The list reflects
+the choices made at scaffold time.
+
+## Installed via seed-db.sh
+
+| Plugin | Slug | Purpose |
+|---|---|---|
+{{#if PLUGIN_CF7}}| Contact Form 7 | `contact-form-7` | Contact forms |
+{{/if}}{{#if PLUGIN_SUPER_CACHE}}| WP Super Cache | `wp-super-cache` | Page caching, HTTP/2 compatible |
+{{/if}}{{#if PLUGIN_RANK_MATH}}| Rank Math SEO | `seo-by-rank-math` | SEO, sitemaps, JSON-LD, OG/Twitter cards |
+{{/if}}{{#if PLUGIN_UPDRAFT}}| UpdraftPlus | `updraftplus` | Backups |
+{{/if}}{{#if PLUGIN_WORDFENCE}}| Wordfence | `wordfence` | Firewall, brute-force protection (deactivated locally) |
+{{/if}}{{#if PLUGIN_BSR}}| Better Search Replace | `better-search-replace` | DB URL swaps (staging → prod) |
+{{/if}}{{#if MULTI_LANG}}| Polylang | `polylang` | Multi-language routing, hreflang, language switcher |
+{{/if}}
+
+## Configuration notes
+
+{{#if MULTI_LANG}}- **Polylang** → Languages: add the locales configured at scaffold time
+  ({{LOCALES_CSV}}), with **{{DEFAULT_LOCALE}}** as default. URL mode:
+  "Directory" with no prefix on the default language.
+{{/if}}{{#if PLUGIN_RANK_MATH}}- **Rank Math** → run the onboarding wizard. Local SEO settings produce
+  schema.org markup; set address + phone to enable structured data globally.
+{{/if}}{{#if PLUGIN_CF7}}- **Contact Form 7** → create one form with fields: name, email, phone,
+  message. Note its ID and store it in a WP option for the theme to read:
+  `wp option update {{PREFIX}}_cf7_contact_id <ID> --allow-root`.
+{{/if}}{{#if PLUGIN_SUPER_CACHE}}- **WP Super Cache** → Advanced → enable caching → use expert mode
+  (mod_rewrite). Exclude any pages with forms or live widgets from cache.
+{{/if}}{{#if PLUGIN_WORDFENCE}}- **Wordfence** → set firewall to "Extended Protection" once site is public.
+  Until staging is hardened, run in Learning Mode.
+{{/if}}{{#if PLUGIN_UPDRAFT}}- **UpdraftPlus** → schedule weekly full backups to off-site storage. Keep
+  last 7.
+{{/if}}{{#if PLUGIN_BSR}}- **Better Search Replace** → used at production cutover, not part of
+  regular dev.
+{{/if}}
+
+## Adding custom plugins
+
+1. Create directory: `wp-content/plugins/{{PREFIX}}-custom-plugin-name/`
+2. Whitelist in root `.gitignore`:
+   ```
+   !wp-content/plugins/{{PREFIX}}-custom-plugin-name/
+   ```
+3. Commit the plugin directory.
+{{#if FTP_ENABLED}}4. Add the plugin slug to `FTP_CUSTOM_PLUGINS` in `.env.deploy.example` (and
+   your local `.env.deploy`) so `./scripts/deploy-ftp.sh` mirrors it.
+{{/if}}5. Add `wp plugin activate {{PREFIX}}-custom-plugin-name` to `scripts/seed-db.sh`.

@@ -11,7 +11,7 @@
         "source": "github",
         "repo": "olbartek/agent-skills"
       },
-      "description": "Personal collection of Claude Code skills: cloc, agent-setup, codebase-analysis."
+      "description": "Personal collection of Claude Code skills: cloc, agent-setup, codebase-analysis, wp-init."
     }
   ]
 }

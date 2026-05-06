@@ -1,0 +1,20 @@
+{
+  "name": "{{THEME_SLUG}}",
+  "version": "1.0.0",
+  "description": "{{PROJECT_DESCRIPTION}}",
+  "private": true,
+  "scripts": {
+    "build": "gulp build",
+    "watch": "gulp",
+    "pot": "wp i18n make-pot . languages/{{THEME_SLUG}}.pot --domain={{THEME_SLUG}}"
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.0",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-csso": "^4.0.1",
+    "gulp-sass": "^6.0.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "sass": "^1.77.0"
+  }
+}

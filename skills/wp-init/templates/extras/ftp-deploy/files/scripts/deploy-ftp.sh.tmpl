@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# Deploy the custom theme + custom plugins via FTPS.
+# WordPress core + third-party plugins are server-managed.
+set -euo pipefail
+
+ENV_FILE="$(dirname "$0")/../.env.deploy"
+if [ ! -f "$ENV_FILE" ]; then
+  echo "Missing .env.deploy. Copy .env.deploy.example and fill credentials." >&2
+  exit 1
+fi
+# shellcheck disable=SC1090
+set -a; source "$ENV_FILE"; set +a
+
+: "${FTP_HOST:?FTP_HOST is required}"
+: "${FTP_USER:?FTP_USER is required}"
+: "${FTP_PASS:?FTP_PASS is required}"
+: "${FTP_REMOTE_THEME_PATH:?FTP_REMOTE_THEME_PATH is required}"
+
+if ! command -v lftp >/dev/null 2>&1; then
+  echo "lftp not installed. Install with: brew install lftp" >&2
+  exit 1
+fi
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+THEME_DIR="$REPO_ROOT/wp-content/themes/{{THEME_SLUG}}"
+PLUGINS_ROOT="$REPO_ROOT/wp-content/plugins"
+
+{{#if SCSS_ENABLED}}echo "▸ Building theme assets…"
+(cd "$THEME_DIR" && npm run build >/dev/null)
+{{/if}}
+
+LFTP_PREAMBLE="
+  set ftp:ssl-allow yes
+  set ftp:ssl-force true
+  set ftp:ssl-protect-data true
+  set ssl:verify-certificate ${FTP_VERIFY_CERT:-no}
+  set net:max-retries 2
+  set net:timeout 20
+"
+
+# 1. Theme
+echo "▸ Uploading theme → $FTP_HOST:${FTP_REMOTE_THEME_PATH} (FTPS, explicit TLS)"
+lftp -c "
+  $LFTP_PREAMBLE
+  open -u \"$FTP_USER\",\"$FTP_PASS\" -p \"${FTP_PORT:-21}\" \"ftp://$FTP_HOST\"
+  mirror --reverse --delete --verbose --parallel=4 \
+    --exclude-glob node_modules/ \
+    --exclude-glob sass/ \
+    --exclude-glob '*.map' \
+    --exclude-glob '.DS_Store' \
+    --exclude-glob '.gitignore' \
+    --exclude-glob 'package*.json' \
+    --exclude-glob 'gulpfile.js' \
+    \"$THEME_DIR/\" \"$FTP_REMOTE_THEME_PATH/\"
+  bye
+"
+
+# 2. Custom plugins (space-separated list).
+if [ -n "${FTP_CUSTOM_PLUGINS:-}" ]; then
+  for plugin in $FTP_CUSTOM_PLUGINS; do
+    src="$PLUGINS_ROOT/$plugin"
+    [ -d "$src" ] || { echo "  skip: $plugin (directory missing)"; continue; }
+    dst="${FTP_REMOTE_PLUGIN_PATH:-wp-content/plugins}/$plugin"
+    echo "▸ Uploading plugin → $dst"
+    lftp -c "
+      $LFTP_PREAMBLE
+      open -u \"$FTP_USER\",\"$FTP_PASS\" -p \"${FTP_PORT:-21}\" \"ftp://$FTP_HOST\"
+      mirror --reverse --delete --verbose --parallel=4 \
+        --exclude-glob '.DS_Store' \
+        --exclude-glob '.gitignore' \
+        --exclude-glob 'node_modules/' \
+        \"$src/\" \"$dst/\"
+      bye
+    "
+  done
+fi
+
+echo "✓ Deploy complete."

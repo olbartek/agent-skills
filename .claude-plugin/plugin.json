@@ -1,7 +1,7 @@
 {
   "name": "olbartek-skills",
-  "version": "0.2.0",
-  "description": "Personal collection of Claude Code skills: cloc, agent-setup, codebase-analysis.",
+  "version": "0.3.0",
+  "description": "Personal collection of Claude Code skills: cloc, agent-setup, codebase-analysis, wp-init.",
   "author": {
     "name": "Bartosz Olszanowski",
     "email": "bartosz.olszanowski@gmail.com"

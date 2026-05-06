@@ -1,0 +1,45 @@
+# {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
+
+Lightweight custom WordPress theme (`{{THEME_SLUG}}`), Docker-based local dev{{#if FTP_ENABLED}}, FTPS deploy{{/if}}.
+
+## Quick start
+
+```bash
+cp .env.example .env
+docker compose up -d
+./scripts/seed-db.sh
+open http://{{HOSTNAME}}:{{WP_PORT}}
+```
+
+Add once to `/etc/hosts`:
+
+```
+127.0.0.1  {{HOSTNAME}}
+```
+
+## Docs
+
+- [Local development](docs/local-development.md)
+- [Plugins](docs/plugins.md)
+{{#if FTP_ENABLED}}- [FTPS deployment](docs/deployment-ftp.md)
+{{/if}}{{#if DEEPL_ENABLED}}- [Translations (DeepL pipeline)](docs/translations.md)
+{{/if}}{{#if HTML_MOCKUP}}- [HTML import notes](docs/import-html.md)
+{{/if}}
+
+## Tech
+
+WordPress 6.x · PHP 8.3 · MariaDB 10.11{{#if SCSS_ENABLED}} · SCSS + Gulp 4{{/if}} · vanilla JS{{#if MULTI_LANG}} · Polylang{{/if}}{{#if FTP_ENABLED}} · Docker Compose · lftp{{else}} · Docker Compose{{/if}}.
+
+## Ports (local)
+
+| Service    | Host port      | URL                                       |
+| ---------- | -------------- | ----------------------------------------- |
+| WordPress  | {{WP_PORT}}        | http://{{HOSTNAME}}:{{WP_PORT}}              |
+| phpMyAdmin | {{PHPMYADMIN_PORT}} | http://localhost:{{PHPMYADMIN_PORT}}        |
+| MariaDB    | {{DB_PORT}}        | `localhost:{{DB_PORT}}`                  |
+
+Override via `.env` (`WP_PORT`, `PHPMYADMIN_PORT`, `DB_PORT`).
+
+<!-- WP_INIT:DEPLOY_SECTION -->

@@ -1,0 +1,48 @@
+# FTPS Deployment
+
+## One-time setup
+
+1. Copy `.env.deploy.example` to `.env.deploy` and fill in:
+   - `FTP_HOST` — from your hosting panel
+   - `FTP_USER`, `FTP_PASS` — from your hosting panel
+   - `FTP_REMOTE_THEME_PATH` — confirmed via panel; should land inside the
+     subdomain's `wp-content/themes/{{THEME_SLUG}}` directory.
+2. Install `lftp` locally: `brew install lftp`.
+3. Enable FTPS in your FTP client (Cyberduck / Transmit / FileZilla) — explicit
+   TLS on port 21.
+
+## Deploy
+
+```bash
+./scripts/deploy-ftp.sh
+```
+
+Runs:
+{{#if SCSS_ENABLED}}1. `npm run build` in the theme.
+{{/if}}2. `lftp mirror --reverse --delete` over FTPS.
+3. Skips `node_modules/`{{#if SCSS_ENABLED}}, `sass/`, `*.map`{{/if}}, `.DS_Store`.
+
+## What is NOT deployed
+
+- WordPress core — managed server-side.
+- Third-party plugins — installed via `/wp-admin/plugin-install.php`.
+- Uploads — handled by WP admin.
+- `.env`, `.env.deploy`, `wp-config.php` — gitignored and never deployed.
+
+## First deploy checklist
+
+1. In hosting panel: create the subdomain, enable Let's Encrypt SSL.
+2. Install WordPress via the panel's one-click installer into that subdomain.
+3. In WP admin: install and activate the plugins listed in
+   [plugins.md](plugins.md){{#if MULTI_LANG}}, then configure Polylang
+   languages per [local-development.md](local-development.md){{/if}}.
+4. Run `./scripts/deploy-ftp.sh` — uploads the custom theme.
+5. WP admin → Appearance → Themes → activate {{PROJECT_NAME}}.
+6. Password-protect the subdomain via the hosting panel until staging is ready
+   for review.
+
+## Database changes
+
+Without SSH, use:
+- **phpMyAdmin** in the hosting panel for manual changes.
+- **Better Search Replace** plugin in WP admin for URL swaps.

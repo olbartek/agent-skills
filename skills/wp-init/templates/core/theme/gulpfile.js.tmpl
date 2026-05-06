@@ -1,0 +1,36 @@
+const gulp         = require('gulp');
+const sass         = require('gulp-sass')(require('sass'));
+const autoprefixer = require('gulp-autoprefixer');
+const sourcemaps   = require('gulp-sourcemaps');
+const csso         = require('gulp-csso');
+const browserSync  = require('browser-sync').create();
+
+const SRC  = 'sass/**/*.scss';
+const DEST = 'dist';
+
+function styles() {
+  return gulp.src('sass/main.scss')
+    .pipe(sourcemaps.init())
+    .pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
+    .pipe(autoprefixer({ overrideBrowserslist: ['last 2 versions', '> 1%', 'not dead'] }))
+    .pipe(csso())
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(DEST))
+    .pipe(browserSync.stream());
+}
+
+function serve() {
+  browserSync.init({
+    proxy: 'http://{{HOSTNAME}}:{{WP_PORT}}',
+    open: false,
+    notify: false,
+  });
+  gulp.watch(SRC, styles);
+  gulp.watch('**/*.php').on('change', browserSync.reload);
+  gulp.watch('js/**/*.js').on('change', browserSync.reload);
+}
+
+exports.styles = styles;
+exports.build  = styles;
+exports.serve  = serve;
+exports.default = gulp.series(styles, serve);

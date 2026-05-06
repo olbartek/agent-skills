@@ -1,0 +1,10 @@
+<?php if (!defined('ABSPATH')) { exit; } get_header(); ?>
+
+<?php get_template_part('template-parts/hero'); ?>
+
+<section class="wrap">
+  <h2><?php esc_html_e('Welcome to {{PROJECT_NAME}}', '{{THEME_SLUG}}'); ?></h2>
+  <p><?php esc_html_e('Edit this template at wp-content/themes/{{THEME_SLUG}}/front-page.php.', '{{THEME_SLUG}}'); ?></p>
+</section>
+
+<?php get_footer(); ?>

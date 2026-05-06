@@ -1,0 +1,88 @@
+# Local Development
+
+## Prerequisites
+- Docker Desktop
+- Node.js 20+
+{{#if FTP_ENABLED}}- `lftp` (for deployment): `brew install lftp`
+{{/if}}
+
+## Setup
+
+```bash
+git clone <repo>
+cd {{PROJECT_SLUG}}
+cp .env.example .env
+docker compose up -d
+```
+
+Add to `/etc/hosts`:
+```
+127.0.0.1  {{HOSTNAME}}
+```
+
+First-time seed:
+```bash
+./scripts/seed-db.sh
+```
+
+Open http://{{HOSTNAME}}:{{WP_PORT}}.
+
+## Port map
+
+| Service | Host port | Container port |
+|---|---|---|
+| WordPress | {{WP_PORT}} | 80 |
+| phpMyAdmin | {{PHPMYADMIN_PORT}} | 80 |
+| MariaDB | {{DB_PORT}} | 3306 |
+
+Override via `.env` (`WP_PORT`, `PHPMYADMIN_PORT`, `DB_PORT`). Defaults are
+chosen to avoid collisions with other local WP projects.
+
+{{#if SCSS_ENABLED}}## Theme dev loop
+
+```bash
+cd wp-content/themes/{{THEME_SLUG}}
+npm install      # first time
+npm run watch    # gulp watch + BrowserSync reload on SCSS/PHP/JS change
+```
+
+Build CSS once: `npm run build`.
+{{/if}}
+
+{{#if MULTI_LANG}}## First-time Polylang setup
+
+After `./scripts/seed-db.sh` on a fresh install:
+
+1. `/wp-admin/ → Languages` — add the locales you configured at scaffold time
+   ({{LOCALES_CSV}}). Default is **{{DEFAULT_LOCALE}}**. Set URL mode to
+   "Directory" with "Hide URL language information for the default language"
+   enabled.
+2. For each new page, use Polylang's "Translations" column to add per-language
+   versions.
+3. `/wp-admin/ → Appearance → Menus` — create a primary menu per language and
+   assign each to the `primary` location.
+4. Export the DB so future checkouts reproduce everything:
+
+   ```bash
+   docker compose exec database sh -lc 'mysqldump -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" --no-create-info --skip-comments' > docs/seed/{{PROJECT_SLUG}}-seed.sql
+   git add docs/seed/{{PROJECT_SLUG}}-seed.sql
+   git commit -m "chore(seed): DB export"
+   ```
+{{/if}}
+
+## Common tasks
+
+Reset DB:
+```bash
+docker compose down -v && docker compose up -d && ./scripts/seed-db.sh
+```
+
+Tail WP debug log:
+```bash
+docker compose exec wordpress tail -f /var/www/html/wp-content/debug.log
+```
+
+Stop without losing data:
+```bash
+docker compose stop
+```

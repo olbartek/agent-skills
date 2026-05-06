@@ -1,0 +1,77 @@
+# ────────── WordPress core & third-party — whitelist style ──────────
+/*
+!/.gitignore
+!/.env.example
+{{#if FTP_ENABLED}}!/.env.deploy.example
+{{/if}}!/docker-compose.yml
+!/README.md
+!/docs/
+!/scripts/
+!/wp-content/
+# Agent config (shared with team via git — per-agent dirs contain symlinks into .agent/)
+!/.agent/
+!/.claude/
+!/.codex/
+!/.gemini/
+!/AGENTS.md
+!/CLAUDE.md
+!/GEMINI.md
+
+# ────────── wp-content — whitelist only our code ──────────
+wp-content/*
+!wp-content/themes/
+!wp-content/plugins/
+
+wp-content/themes/*
+!wp-content/themes/{{THEME_SLUG}}/
+!wp-content/themes/.gitkeep
+
+wp-content/plugins/*
+!wp-content/plugins/.gitkeep
+{{#if CUSTOM_PLUGIN}}!wp-content/plugins/{{PLUGIN_SLUG}}/
+{{/if}}# WP_INIT:CUSTOM_PLUGIN_WHITELIST
+
+# ────────── Build artefacts ──────────
+node_modules/
+vendor/
+*.log
+
+{{#if SCSS_ENABLED}}# ────────── Theme-specific ──────────
+wp-content/themes/{{THEME_SLUG}}/dist/*.map
+wp-content/themes/{{THEME_SLUG}}/images/_src/
+
+{{/if}}# ────────── Secrets & local files ──────────
+.env
+{{#if FTP_ENABLED}}.env.deploy
+{{/if}}.env.local
+{{#if DEEPL_ENABLED}}scripts/.env.deepl
+{{/if}}wp-config.php
+wp-config-local.php
+# Agent user-local (never shared)
+.claude/settings.local.json
+
+# ────────── OS / IDE noise ──────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ────────── Runtime noise ──────────
+debug.log
+error_log
+*.sql
+*.sql.gz
+# ...but the seed dump IS tracked — it's how fresh checkouts reproduce content.
+!docs/seed/*.sql
+ai1wm-backups/
+wp-content/uploads/
+wp-content/cache/
+wp-content/backup-db/
+wp-content/upgrade/
+wp-content/wflogs/
+{{#if PROD_BOOTSTRAP}}
+# Production bootstrap (one-shot, never committed)
+scripts/prod-bootstrap.php
+{{/if}}

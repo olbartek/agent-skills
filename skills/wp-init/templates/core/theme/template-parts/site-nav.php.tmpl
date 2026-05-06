@@ -1,0 +1,18 @@
+<?php
+if (!defined('ABSPATH')) { exit; }
+?>
+<nav class="site-nav" aria-label="<?php esc_attr_e('Primary menu', '{{THEME_SLUG}}'); ?>">
+  <button class="site-nav__toggle" aria-expanded="false" aria-controls="site-nav-menu" type="button">
+    <span class="u-visually-hidden"><?php esc_html_e('Toggle menu', '{{THEME_SLUG}}'); ?></span>
+    <span class="site-nav__burger" aria-hidden="true"></span>
+  </button>
+  <?php
+  wp_nav_menu([
+      'theme_location' => 'primary',
+      'menu_id'        => 'site-nav-menu',
+      'menu_class'     => 'site-nav__menu',
+      'container'      => false,
+      'fallback_cb'    => '__return_empty_string',
+  ]);
+  ?>
+</nav>

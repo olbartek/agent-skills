@@ -1,0 +1,30 @@
+<?php
+/**
+ * {{PROJECT_NAME}} theme bootstrap.
+ */
+
+if (!defined('ABSPATH')) { exit; }
+
+define('{{PREFIX_UPPER}}_THEME_VERSION', '1.0.0');
+define('{{PREFIX_UPPER}}_THEME_DIR',     get_template_directory());
+define('{{PREFIX_UPPER}}_THEME_URI',     get_template_directory_uri());
+
+require_once {{PREFIX_UPPER}}_THEME_DIR . '/includes/cleanup.php';
+require_once {{PREFIX_UPPER}}_THEME_DIR . '/includes/icons.php';
+require_once {{PREFIX_UPPER}}_THEME_DIR . '/includes/enqueue.php';
+require_once {{PREFIX_UPPER}}_THEME_DIR . '/includes/seo.php';
+// WP_INIT:INCLUDES
+
+add_action('after_setup_theme', function () {
+    load_theme_textdomain('{{THEME_SLUG}}', {{PREFIX_UPPER}}_THEME_DIR . '/languages');
+    add_theme_support('title-tag');
+    add_theme_support('post-thumbnails');
+    add_theme_support('html5', ['search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script']);
+    add_theme_support('custom-logo', ['height' => 80, 'width' => 240, 'flex-width' => true]);
+    // WP_INIT:THEME_SUPPORTS
+
+    register_nav_menus([
+        'primary' => __('Primary menu', '{{THEME_SLUG}}'),
+        'footer'  => __('Footer menu',  '{{THEME_SLUG}}'),
+    ]);
+});

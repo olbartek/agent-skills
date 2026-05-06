@@ -1,0 +1,9 @@
+body {
+  font: #{$fz-base}/#{$lh-base} #{$font-sans};
+  color: $color-text;
+  background: $color-bg;
+}
+h1 { font-size: $fz-h1; line-height: $lh-tight; }
+h2 { font-size: $fz-h2; line-height: $lh-tight; }
+.body-lg { font-size: $fz-lg; }
+.dim    { color: $color-muted; }

@@ -1,0 +1,116 @@
+#!/usr/bin/env node
+/**
+ * Translate {{THEME_SLUG}}.pot → one .po + .mo per locale, via DeepL.
+ *
+ * Usage:
+ *   DEEPL_KEY=xxx node scripts/translate-po.mjs
+ *
+ * The DEEPL_KEY can also live in scripts/.env.deepl (KEY=VALUE per line).
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import gettextParser from 'gettext-parser';
+import fetch from 'node-fetch';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..');
+const LANG_DIR = path.join(ROOT, 'wp-content/themes/{{THEME_SLUG}}/languages');
+const POT = path.join(LANG_DIR, '{{THEME_SLUG}}.pot');
+
+// Configured at scaffold time from {{LOCALES_CSV}}, default {{DEFAULT_LOCALE}}.
+// Source language is taken as the first locale in the list.
+const ALL_LOCALES = '{{LOCALES_CSV}}'.split(',').map(s => s.trim()).filter(Boolean);
+const SOURCE = ALL_LOCALES[0] || '{{DEFAULT_LOCALE}}';
+const TARGETS = ALL_LOCALES
+  .filter(l => l !== SOURCE)
+  .map(locale => ({
+    locale,
+    deepl: locale.startsWith('en') ? 'EN-US'
+         : locale.startsWith('pt') ? 'PT-PT'
+         : locale.slice(0, 2).toUpperCase(),
+  }));
+
+function loadDeeplKey() {
+  if (process.env.DEEPL_KEY) return process.env.DEEPL_KEY;
+  const envFile = path.join(__dirname, '.env.deepl');
+  if (fs.existsSync(envFile)) {
+    const m = fs.readFileSync(envFile, 'utf8').match(/^DEEPL_KEY=(.+)$/m);
+    if (m) return m[1].trim();
+  }
+  throw new Error('DEEPL_KEY not set — export it or add to scripts/.env.deepl');
+}
+
+const BATCH = 40;
+
+async function deeplBatch(texts, targetLang, apiKey, attempt = 1) {
+  const params = new URLSearchParams();
+  params.append('source_lang', SOURCE.slice(0, 2).toUpperCase());
+  params.append('target_lang', targetLang);
+  params.append('preserve_formatting', '1');
+  for (const t of texts) params.append('text', t);
+
+  const res = await fetch('https://api-free.deepl.com/v2/translate', {
+    method: 'POST',
+    headers: {
+      'Authorization': `DeepL-Auth-Key ${apiKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params,
+  });
+
+  if (res.status === 429 && attempt <= 5) {
+    const wait = 1000 * Math.pow(2, attempt);
+    await new Promise(r => setTimeout(r, wait));
+    return deeplBatch(texts, targetLang, apiKey, attempt + 1);
+  }
+  if (!res.ok) throw new Error(`DeepL ${res.status}: ${await res.text()}`);
+  const body = await res.json();
+  return body.translations.map(t => t.text);
+}
+
+async function translatePotTo(target, apiKey) {
+  const pot = gettextParser.po.parse(fs.readFileSync(POT));
+  const out = {
+    charset: 'utf-8',
+    headers: {
+      ...pot.headers,
+      'language': target.locale,
+      'content-type': 'text/plain; charset=utf-8',
+      'plural-forms': 'nplurals=2; plural=(n != 1);',
+    },
+    translations: {},
+  };
+  const queue = [];
+  for (const ctx of Object.keys(pot.translations)) {
+    out.translations[ctx] = {};
+    for (const msgid of Object.keys(pot.translations[ctx])) {
+      const entry = pot.translations[ctx][msgid];
+      if (!msgid) { out.translations[ctx][msgid] = entry; continue; }
+      queue.push({ ctx, msgid, entry });
+    }
+  }
+  for (let i = 0; i < queue.length; i += BATCH) {
+    const chunk = queue.slice(i, i + BATCH);
+    const translations = await deeplBatch(chunk.map(q => q.msgid), target.deepl, apiKey);
+    chunk.forEach((q, idx) => {
+      out.translations[q.ctx][q.msgid] = { ...q.entry, msgstr: [translations[idx]] };
+    });
+  }
+  fs.writeFileSync(path.join(LANG_DIR, `${target.locale}.po`), gettextParser.po.compile(out));
+  fs.writeFileSync(path.join(LANG_DIR, `${target.locale}.mo`), gettextParser.mo.compile(out));
+  console.log(`✓ ${target.locale}`);
+}
+
+async function main() {
+  if (!fs.existsSync(POT)) {
+    console.error(`Missing ${POT} — generate it first via npm run pot inside the theme.`);
+    process.exit(1);
+  }
+  const apiKey = loadDeeplKey();
+  for (const t of TARGETS) {
+    console.log(`Translating → ${t.locale} (DeepL: ${t.deepl})`);
+    await translatePotTo(t, apiKey);
+  }
+}
+main().catch(e => { console.error(e); process.exit(1); });

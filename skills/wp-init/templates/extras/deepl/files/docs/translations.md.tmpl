@@ -1,0 +1,44 @@
+# Translations
+
+## Two layers
+
+| Layer | What it is | What it handles | Where it lives |
+|---|---|---|---|
+| **gettext (`.po/.mo`)** | WP's string translation | Theme chrome (buttons, labels, nav) | `wp-content/themes/{{THEME_SLUG}}/languages/` — tracked in git |
+| **Polylang pages** | CMS-level multilingual | Page-level content + URLs | WP DB |
+
+## Generating .po/.mo via DeepL
+
+1. Extract strings from the theme into a `.pot` file:
+
+   ```bash
+   docker compose exec wordpress wp i18n make-pot \
+     /var/www/html/wp-content/themes/{{THEME_SLUG}} \
+     /var/www/html/wp-content/themes/{{THEME_SLUG}}/languages/{{THEME_SLUG}}.pot \
+     --domain={{THEME_SLUG}} --allow-root
+   ```
+
+2. Set your DeepL API key (free tier — 500k chars/month):
+
+   ```bash
+   echo "DEEPL_KEY=your-key-here" > scripts/.env.deepl
+   ```
+
+3. Install once, then run:
+
+   ```bash
+   cd scripts && npm install && cd ..
+   node scripts/translate-po.mjs
+   ```
+
+4. Commit the results:
+
+   ```bash
+   git add wp-content/themes/{{THEME_SLUG}}/languages/
+   git commit -m "i18n: DeepL-generated translations"
+   ```
+
+## Manual corrections
+
+After machine translation, native-speaker edits should go into the `.po`
+files and be recompiled (Poedit auto-compiles `.mo`; CLI: `msgfmt`).

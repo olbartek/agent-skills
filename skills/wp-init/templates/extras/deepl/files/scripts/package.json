@@ -1,0 +1,9 @@
+{
+  "name": "wp-init-scripts",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "gettext-parser": "^8.0.0",
+    "node-fetch": "^3.3.2"
+  }
+}

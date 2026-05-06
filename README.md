@@ -7,6 +7,7 @@ Personal collection of Claude Code skills, packaged as a plugin so they can be i
 - **cloc** — count lines of code, language breakdown, version comparisons.
 - **agent-setup** — set up a project for multi-agent compatibility (Claude, Gemini, Codex).
 - **codebase-analysis** — generate quantitative reports on a codebase (LOC, dependencies, coupling, hotspots).
+- **wp-init** — scaffold a new WordPress project with Docker local dev, lightweight custom theme, FTP deploy, and multi-agent setup.
 
 ## Install
 

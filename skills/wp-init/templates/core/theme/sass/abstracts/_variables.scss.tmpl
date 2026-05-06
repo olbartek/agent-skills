@@ -1,0 +1,43 @@
+// {{PROJECT_NAME}} — design tokens.
+// Replace these placeholders with the project's actual palette.
+
+// ── Palette ──
+$color-bg:        #ffffff;
+$color-bg-alt:    #f4f4f4;
+$color-text:      #111;
+$color-muted:     #666;
+$color-line:      rgba(0, 0, 0, 0.12);
+$color-accent:    #2563eb;
+$color-accent-dk: #1d4ed8;
+
+// ── Typography ──
+$font-sans:  ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$font-serif: Georgia, "Times New Roman", serif;
+$font-mono:  ui-monospace, "SF Mono", Menlo, monospace;
+
+$fz-base: 16px;
+$fz-sm:   14px;
+$fz-lg:   18px;
+$fz-h1:   clamp(32px, 4vw, 56px);
+$fz-h2:   clamp(24px, 3vw, 36px);
+
+$lh-tight: 1.2;
+$lh-base:  1.55;
+
+// ── Spacing ──
+$sp-1: 4px; $sp-2: 8px; $sp-3: 12px; $sp-4: 16px; $sp-5: 24px;
+$sp-6: 32px; $sp-7: 48px; $sp-8: 64px;
+
+// ── Breakpoints ──
+$bp-sm: 540px; $bp-md: 768px; $bp-lg: 1024px; $bp-xl: 1280px;
+
+// ── Layout ──
+$wrap-max: 1280px;
+$wrap-pad: 24px;
+
+// ── CSS custom properties (exposed for runtime overrides) ──
+:root {
+  --{{PREFIX}}-color-text: #{$color-text};
+  --{{PREFIX}}-color-bg:   #{$color-bg};
+  --{{PREFIX}}-accent:     #{$color-accent};
+}
