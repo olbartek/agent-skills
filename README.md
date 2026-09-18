@@ -8,6 +8,7 @@ Personal collection of Claude Code skills, packaged as a plugin so they can be i
 - **agent-setup** — set up a project for multi-agent compatibility (Claude, Gemini, Codex).
 - **codebase-analysis** — generate quantitative reports on a codebase (LOC, dependencies, coupling, hotspots).
 - **wp-init** — scaffold a new WordPress project with Docker local dev, lightweight custom theme, FTP deploy, and multi-agent setup.
+- **save-to-brain** — save guides, research, ideas or sources from any session into your markdown knowledge vault(s), following each vault's own `AGENTS.md`.
 
 ## Install
 
